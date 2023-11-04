@@ -3,25 +3,24 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define RST_PIN   9     // reset�� ����
-#define SS_PIN    10    // �����͸� �ְ��޴� ������ ��( SS = Slave Selector )
+#define RST_PIN   9     // reset핀 설정
+#define SS_PIN    10    // 데이터를 주고받는 역할의 핀( SS = Slave Selector )
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);           // �� �ڵ忡�� MFR522�� �̿��ϱ� ���� mfrc��ü�� ������ �ݴϴ�.
+MFRC522 mfrc522(SS_PIN, RST_PIN);           // 이 코드에서 MFR522를 이용하기 위해 mfrc객체를 생성해 줍니다.
 
-int rfidLED = 4;                            // LED�� 4���ɿ� �����մϴ�.
+int rfidLED = 4;                            // LED를 4번핀에 연결합니다.
 
 
 void RFIDsetup() {
-    Serial.begin(9600);                     // �ø��� ���, �ӵ��� 9600
-    SPI.begin();                             // SPI �ʱ�ȭ(SPI : �ϳ��� �����Ϳ� �ټ��� SLAVE(�������� ��Ȱ)���� ��� ���)
+    Serial.begin(9600);                     // 시리얼 통신, 속도는 9600
+    SPI.begin();                             // SPI 초기화(SPI : 하나의 마스터와 다수의 SLAVE(종속적인 역활)간의 통신 방식)
     mfrc522.PCD_Init();   // Initiate MFRC522
-    pinMode(rfidLED, OUTPUT);                 // 4������ ������� ����
+    pinMode(rfidLED, OUTPUT);                 // 4번핀을 출력으로 설정
 
 }
 
 void RFIDfunc(int rfid) {
-    if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {    //  �±� ������ ���� �ʾ����� �Ǵ� ���̵� �������� �ʾ�����
-        delay(500);
+    if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {    //  태그 접촉이 되지 않았을때 또는 아이디가 읽혀지지 않았을때
         return;                                   // return
     }
 
@@ -43,17 +42,17 @@ void RFIDfunc(int rfid) {
     if (content.substring(1) == "D1 2A D4 1C") //change here the UID of the card/cards that you want to give access
     {
         //Serial.println("Authorized access");
-        rfid = 1;                               // ����Ȯ��
-        digitalWrite(rfidLED, HIGH);                // 3���� �� ����� led ������         
+        rfid = 1;                               // 본인확인
+        digitalWrite(rfidLED, HIGH);               // 3번핀 에 연결된 led 켜지기         
         //delay(1000);
         //digitalWrite(rfidLED, LOW);
         //delay(1000);
 
     }
-    else {                                   // �ٸ� �±� ID�� ���
-        rfid = 2;                               // ħ��
-        digitalWrite(rfidLED, LOW);               // 4���� �� ����� led ������
-        //Serial.println("Access denied");        // �ø��� ����Ϳ� "Who are you?" ��� 
+    else {                                   // 다른 태그 ID일 경우
+        rfid = 2;                               // 침입자
+        digitalWrite(rfidLED, LOW);               // 4번핀 에 연결된 led 꺼지기
+        //Serial.println("Access denied");        
         //delay(500);
     }
 }
