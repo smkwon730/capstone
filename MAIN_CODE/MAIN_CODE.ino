@@ -18,45 +18,98 @@ void setup() {
 }
 
 void loop() {
-  int door = 0;
-  inout(door);                  // in FSR.h
-  
-  if (door = 1) {               //외출
-    Serial.println("door=1");
-    //Serial.println(door);
+
+// =================== clock ====================
+// check if you press the SET button and increase the menu index
+  if(digitalRead(P1)== LOW) 
+  {
+   menu=menu+1;
   }
+  if((digitalRead(P2)== LOW)&&(digitalRead(P3)== LOW))                                                                                                                                                                     
+  {
+    
+    DisplaySetHourAll();
+    DisplaySetMinuteAll();
+    lcd.clear();
+    lcd.setCursor(5,0);
+    lcd.print("ALARM");
+    lcd.setCursor(5,1);
+    lcd.print(alarmHours, DEC);
+    lcd.print(":");
+    lcd.print(alarmMinutes, DEC);
+    // delay(1000);
+    // lcd.clear();
+  }
+// in which subroutine should we go?
+  if (menu==0)
+    {
+     DisplayDateTime(); // void DisplayDateTime
+     //Alarm(); // Alarm control
+          }
+  if (menu==1)
+    {
+    DisplaySetHour();
+    }
+  if (menu==2)
+    {
+    DisplaySetMinute();
+    }
+  if (menu==3)
+    {
+    StoreAgg(); 
+    //delay(500);
+    menu=0;
+    }
+    //delay(100);
+// ===================================================
+  int door = 0;
+  int rasp = 0;                 // 라즈베리 전달값
+  int limit = 0;
+  inout(door);                  // in FSR.h
+  Alarm(limit);                 // int click_alarm.h
 
-  if (door =2) {                //귀가
-    Serial.println("door=2");
-    //Serial.println(door);
-
-    int rfid = 0;
-    unsigned long currentMillis = millis();
-
-    while (currentMillis - previousMillis <= delayTime) {   // 5분 제한시간
-
-      RFIDfunc(rfid);
-
-      if (rfid = 1) {               // 본인확인
-        Serial.println("rfid=1");
-        //Serial.println(rfid);     // 1 전송 (case1)
-        break;
+  //if (limit = 1) {
+    rasp = 1;
+    if (door = 1) {               //외출
+      if (limit = 1) {
+      Serial.println("door=1");
+      //Serial.println(rasp);       // 1 전송 (case1)
       }
-
-      if (rfid = 2) {               // 본인확인 실패
-        Serial.println("rfid=2");
-        //Serial.println(rfid);     // 2 전송 (case2)
-        break;
-      }
-
-      previousMillis = currentMillis;
     }
 
-    if (rfid = 0) {             // 5분 이후 미확인 == 본인확인 실패
-      rfid = 2;                 // 본인확인실패와 같은 값 전송
-      Serial.println("rfid=0"); // 테스트용
-      //Serial.println(rfid);   // 2 전송 (case2)
-    }
+    if (door =2) {                //귀가
+      Serial.println("door=2");
+
+      int rfid = 0;
+      unsigned long currentMillis = millis();
+
+      while (currentMillis - previousMillis <= delayTime) {   // 5분 제한시간
+
+        RFIDfunc(rfid);
+
+        if (rfid = 1) {               // 본인확인
+          rasp = 3
+          Serial.println("rfid=1");
+          //Serial.println(rfid);     // 3 전송 (case3)
+          break;
+        }
+
+        if (rfid = 2) {               // 본인확인 실패
+          rasp = 2
+          Serial.println("rfid=2");
+          //Serial.println(rfid);     // 2 전송 (case2)
+          break;
+        }
+
+        previousMillis = currentMillis;
+      }
+
+      if (rfid = 0) {             // 5분 이후 미확인 == 본인확인 실패
+        rasp = 2;                 // 본인확인실패와 같은 값 전송
+        Serial.println("rfid=0"); // 테스트용
+        //Serial.println(rfid);   // 2 전송 (case2)
+      }
+//    }
   }
 }
 
