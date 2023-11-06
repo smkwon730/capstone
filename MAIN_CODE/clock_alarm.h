@@ -3,15 +3,15 @@
 #include <RTClib.h>
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(0x3F, 16, 2); // Display  I2C 20 x 4
+LiquidCrystal_I2C lcd(0x3F, 16, 2); // Display  I2C
 RTC_DS1307 RTC;
 
-int P1 = 6; // Button SET MENU'     //��ư
+int P1 = 6; // Button SET MENU'     
 int P2 = 7; // Button +
 int P3 = 8; // Button -
 int P4 = 9; // SWITCH Alarm
 
-#define LED 13          //�˶�
+#define LED 13       
 #define buzzer 10
 
 int hourupg;
@@ -20,8 +20,7 @@ int menu = 0;
 int setAll = 0;
 uint8_t alarmHours = 0, alarmMinutes = 0;  // Holds the current alarm time
 
-void printAllOff() {
-    //lcd.setCursor(0, 3);
+void printAllOff() {                // RTCsetup에서 선언 위해 앞에서 정의
     lcd.setCursor(0, 1);
     lcd.print("Alarm: Off  ");
 }
@@ -55,8 +54,7 @@ void RTCsetup() {
 
 
 
-void DisplayDateTime()
-{
+void DisplayDateTime() {
     // We show the current date and time
     DateTime now = RTC.now();
 
@@ -64,51 +62,43 @@ void DisplayDateTime()
     lcd.setCursor(0, 0);
     lcd.print("Hour : ");
 
-    if (now.hour() <= 9)
-    {
+    if (now.hour() <= 9) {
         lcd.print("0");
     }
     lcd.print(now.hour(), DEC);
     hourupg = now.hour();
     lcd.print(":");
-    if (now.minute() <= 9)
-    {
+    if (now.minute() <= 9) {
         lcd.print("0");
     }
     lcd.print(now.minute(), DEC);
     minupg = now.minute();
     lcd.print(":");
-    if (now.second() <= 9)
-    {
+    if (now.second() <= 9) {
         lcd.print("0");
     }
     lcd.print(now.second(), DEC);
 }
 
-void DisplaySetHour()
-{
+void DisplaySetHour() {
     // time setting
     lcd.clear();
     DateTime now = RTC.now();
-    if (digitalRead(P2) == LOW)
-    {
-        if (hourupg == 23)
-        {
+    if (digitalRead(P2) == LOW) {
+        
+        if (hourupg == 23) {
             hourupg = 0;
         }
-        else
-        {
+        else {
             hourupg = hourupg + 1;
         }
     }
-    if (digitalRead(P3) == LOW)
-    {
-        if (hourupg == 0)
-        {
+    if (digitalRead(P3) == LOW) {
+
+        if (hourupg == 0) {
             hourupg = 23;
         }
-        else
-        {
+        else {
             hourupg = hourupg - 1;
         }
     }
@@ -123,25 +113,21 @@ void DisplaySetMinute()
 {
     // Setting the minutes
     lcd.clear();
-    if (digitalRead(P2) == LOW)
-    {
-        if (minupg == 59)
-        {
+    if (digitalRead(P2) == LOW) {
+        
+        if (minupg == 59) {
             minupg = 0;
         }
-        else
-        {
+        else {
             minupg = minupg + 1;
         }
     }
-    if (digitalRead(P3) == LOW)
-    {
-        if (minupg == 0)
-        {
+    if (digitalRead(P3) == LOW) {
+
+        if (minupg == 0) {
             minupg = 59;
         }
-        else
-        {
+        else {
             minupg = minupg - 1;
         }
     }
@@ -171,23 +157,19 @@ void DisplaySetHourAll()// Setting the alarm minutes
 
         if (digitalRead(P2) == LOW)
         {
-            if (alarmHours == 23)
-            {
+            if (alarmHours == 23) {
                 alarmHours = 0;
             }
-            else
-            {
+            else {
                 alarmHours = alarmHours + 1;
             }
         }
         if (digitalRead(P3) == LOW)
         {
-            if (alarmHours == 0)
-            {
+            if (alarmHours == 0) {
                 alarmHours = 23;
             }
-            else
-            {
+            else {
                 alarmHours = alarmHours - 1;
             }
         }
@@ -207,23 +189,19 @@ void DisplaySetMinuteAll()// Setting the alarm minutes
         lcd.clear();
         if (digitalRead(P2) == LOW)
         {
-            if (alarmMinutes == 59)
-            {
+            if (alarmMinutes == 59) {
                 alarmMinutes = 0;
             }
-            else
-            {
+            else {
                 alarmMinutes = alarmMinutes + 1;
             }
         }
         if (digitalRead(P3) == LOW)
         {
-            if (alarmMinutes == 0)
-            {
+            if (alarmMinutes == 0) {
                 alarmMinutes = 59;
             }
-            else
-            {
+            else {
                 alarmMinutes = alarmMinutes - 1;
             }
         }
@@ -240,42 +218,35 @@ void printAllOn() {
     lcd.setCursor(0, 1);
     lcd.print("Alarm: ");
 
-
-
-    if (alarmHours <= 9)
-    {
+    if (alarmHours <= 9) {
         lcd.print("0");
     }
     lcd.print(alarmHours, DEC);
 
     lcd.print(":");
-    if (alarmMinutes <= 9)
-    {
+    if (alarmMinutes <= 9) {
         lcd.print("0");
     }
     lcd.print(alarmMinutes, DEC);
 
 }
 
-void Alarm() {
-    if (digitalRead(P4) == LOW)
-    {
+void Alarm(int limit) {
+    if (digitalRead(P4) == LOW) {
         setAll = setAll + 1;
     }
-    if (setAll == 0)
-    {
+    if (setAll == 0) {
         printAllOff();
         noTone(buzzer);
         digitalWrite(LED, LOW);
+        limit = 0;
     }
-    if (setAll == 1)
-    {
+    if (setAll == 1) {
 
         printAllOn();
 
         DateTime now = RTC.now();
-        if (now.hour() == alarmHours && now.minute() == alarmMinutes)
-        {
+        if (now.hour() == alarmHours && now.minute() == alarmMinutes) {
             lcd.noBacklight();
             DateTime now = RTC.now();
             digitalWrite(LED, HIGH);
@@ -283,16 +254,17 @@ void Alarm() {
             //delay(300);
             //tone(buzzer, 698); //play the note "F6" (FA5)
             lcd.backlight();
+            limit = 1;
         }
         else {
             noTone(buzzer);
             digitalWrite(LED, LOW);
         }
-
+        limit = 0;
     }
-    if (setAll == 2)
-    {
+    if (setAll == 2) {
         setAll = 0;
+        limit = 0;
     }
     delay(200);
 }
