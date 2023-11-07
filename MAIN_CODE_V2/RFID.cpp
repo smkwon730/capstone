@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "RFID.h"
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);
+MFRC522 mfrc522(SS_PIN, RST_PIN);            // create mfrc object
 
 void RFIDsetup() {
   //Serial.begin(9600);                     // 시리얼 통신, 속도는 9600
