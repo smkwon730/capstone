@@ -258,14 +258,13 @@ void printAllOff() {
   lcd.print("Alarm: Off  ");  
 }
 
-void Alarm() {
+int Alarm(void) {
     if (digitalRead(P4) == LOW) {
         setAll = setAll + 1;
     }
     if (setAll == 0) {
         printAllOff();
         noTone(buzzer);
-        //limit = 0;
     }
     if (setAll == 1) {
 
@@ -280,15 +279,14 @@ void Alarm() {
             //tone(buzzer, 698); //play the note "F6" (FA5)
             lcd.backlight();
             //limit = 1;
+            return 1;
         }
         else {
             noTone(buzzer);
         }
-        //limit = 0;
     }
     if (setAll == 2) {
         setAll = 0;
-        //limit = 0;
     }
-    delay(10);
+    return 0;
 }
