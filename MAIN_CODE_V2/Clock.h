@@ -31,6 +31,6 @@ void DisplaySetHourAll();
 void DisplaySetMinuteAll();
 void printAllOn();
 void printAllOff();
-void Alarm();
+int Alarm(void);
 
 #endif
