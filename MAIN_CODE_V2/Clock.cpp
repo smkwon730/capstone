@@ -1,3 +1,5 @@
+// Clock.cpp
+
 #include "Arduino.h"
 #include "Clock.h"
 
@@ -6,6 +8,7 @@ int hourupg;
 int minupg;
 int menu =0;
 int setAll =0;
+int alarmState = 0; // 알람 상태를 저장할 전역 변수
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 RTC_DS1307 RTC;
@@ -29,15 +32,22 @@ void Clocksetup() {
     RTC.begin();
 
     if (! RTC.isrunning()) {
-        //Serial.println("RTC is NOT running!");
-        //RTC.adjust(DateTime(__DATE__, __TIME__)); // Set the date and time at compile time
+        Serial.println("RTC is NOT running!");
+        RTC.adjust(DateTime(__DATE__, __TIME__)); // Set the date and time at compile time
     }
         RTC.adjust(DateTime(__DATE__, __TIME__)); //removing "//" to adjust the time
         // The default display shows the date and time
-        int menu=0;
+        //int menu=0;
 }
 
-void clockloop() { 
+void delayWithoutBlocking(unsigned long duration) {
+  unsigned long startTime = millis();
+  while (millis() - startTime < duration) {
+    // 대기하고자 하는 시간까지 아무 작업도 수행하지 않음
+  }
+}
+
+void clockLoop() { 
 // check if you press the SET button and increase the menu index
     if(digitalRead(P1)== LOW) {
     menu=menu+1;
@@ -53,7 +63,7 @@ void clockloop() {
         lcd.print(alarmHours, DEC);
         lcd.print(":");
         lcd.print(alarmMinutes, DEC);
-        delay(1000);
+        delayWithoutBlocking(1000);
         lcd.clear();
     }
 
@@ -69,19 +79,18 @@ void clockloop() {
     }
     if (menu==3){
         StoreAgg(); 
-        delay(500);
+        delayWithoutBlocking(500);
         menu=0;
     }
-    delay(1);
+    delayWithoutBlocking(100);
 }
 
 void DisplayDateTime() {
     // We show the current date and time
     DateTime now = RTC.now();
 
-    //lcd.setCursor(0, 2);
     lcd.setCursor(0, 0);
-    lcd.print("Hour : ");
+    lcd.print("Time : ");
 
     if (now.hour() <= 9) {
         lcd.print("0");
@@ -127,7 +136,7 @@ void DisplaySetHour() {
     lcd.print("Set time:");
     lcd.setCursor(0, 1);
     lcd.print(hourupg, DEC);
-    delay(10);
+    delayWithoutBlocking(200);
 }
 
 void DisplaySetMinute()
@@ -156,7 +165,7 @@ void DisplaySetMinute()
     lcd.print("Set Minutes:");
     lcd.setCursor(0, 1);
     lcd.print(minupg, DEC);
-    delay(10);
+    delayWithoutBlocking(200);
 }
 
 void StoreAgg()
@@ -167,8 +176,8 @@ void StoreAgg()
     lcd.print("SAVING IN");
     lcd.setCursor(0, 1);
     lcd.print("PROGRESS");
-    //RTC.adjust(DateTime(yearupg,monthupg,dayupg,hourupg,minupg,0));
-    delay(10);
+    RTC.adjust(DateTime(0,0,0,hourupg,minupg,0));
+    delayWithoutBlocking(200);
 }
 void DisplaySetHourAll()// Setting the alarm minutes
 {
@@ -198,9 +207,9 @@ void DisplaySetHourAll()// Setting the alarm minutes
         lcd.print("Set HOUR Alarm:");
         lcd.setCursor(0, 1);
         lcd.print(alarmHours, DEC);
-        delay(10);
+        delayWithoutBlocking(200);
     }
-    delay(10);
+    delayWithoutBlocking(200);
 }
 
 void DisplaySetMinuteAll()// Setting the alarm minutes
@@ -227,12 +236,12 @@ void DisplaySetMinuteAll()// Setting the alarm minutes
             }
         }
         lcd.setCursor(0, 0);
-        lcd.print("Set MIN. Alarm:");
+        lcd.print("Set MIN Alarm:");
         lcd.setCursor(0, 1);
         lcd.print(alarmMinutes, DEC);
-        delay(10);
+        delayWithoutBlocking(200);
     }
-    delay(10);
+    delayWithoutBlocking(200);
 }
 void printAllOn() {
     //lcd.setCursor(0,3);
@@ -258,6 +267,13 @@ void printAllOff() {
   lcd.print("Alarm: Off  ");  
 }
 
+int getAlarmState() {   // 외부 코드에서 현재 알람 상태를 읽을 수 있게 함
+    return alarmState;
+}
+void setAlarmState(int state) {     // 알람 상태를 변경할 때 사용
+    alarmState = state;
+}
+
 int Alarm(void) {
     if (digitalRead(P4) == LOW) {
         setAll = setAll + 1;
@@ -265,6 +281,7 @@ int Alarm(void) {
     if (setAll == 0) {
         printAllOff();
         noTone(buzzer);
+        setAlarmState(0); // 알람 상태 설정
     }
     if (setAll == 1) {
 
@@ -279,7 +296,9 @@ int Alarm(void) {
             //tone(buzzer, 698); //play the note "F6" (FA5)
             lcd.backlight();
             //limit = 1;
-            return 1;
+            
+            setAlarmState(1);
+            RTC.adjust(DateTime(0, 0, 0, now.hour(), now.minute(), now.second()));
         }
         else {
             noTone(buzzer);
@@ -287,6 +306,8 @@ int Alarm(void) {
     }
     if (setAll == 2) {
         setAll = 0;
+        setAlarmState(0);
     }
-    return 0;
+    delayWithoutBlocking(200);
+    return;
 }
