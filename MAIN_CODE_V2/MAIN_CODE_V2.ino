@@ -8,7 +8,6 @@
 //const long delay_time = 1000*60*5;   // 5 min
 const long delay_time = 1000*10;   // 30 sec (for test)
 
-
 void setup() {
   InOutsetup();
   Clocksetup();
@@ -36,7 +35,7 @@ void loop() {
     // 제한시간(5분) 이내 rfid 태그 코드
       unsigned long start_time = millis();      
       while(millis() - start_time < delay_time) {
-        
+        clockLoop();
         int rfidResult = rfidCheck();
         
         if (rfidResult == 1) {     // Authorized access
@@ -47,17 +46,16 @@ void loop() {
           uart = 2;
           break;
         }
-        // else {                      // no access in 5min
-        //   uart = 2;
-        // }
+        if (millis() - start_time >= delay_time) {
+          uart = 2;
+          break;
+        }
       }
-      if (uart == 0) {
-        uart = 2;
-      }
+      
     }
   }
-  /* uart가 0이 아니면서 이전의 uart와 다르다면, 그리고 uart가 0이 아니라면
-  uart를 출력하고 previousUart를 업데이트한다. */
+  // uart가 0이 아니면서 이전의 uart와 다르다면, 그리고 uart가 0이 아니라면
+  // uart를 출력하고 previousUart를 업데이트한다.
   if (uart != previousUart && uart != 0) {
     Serial.print("uart: ");
     Serial.println(uart);
@@ -65,8 +63,6 @@ void loop() {
   } else if (uart != previousUart && uart == 0) {
     previousUart = 0;
   }
-
-  //delay(100);
 }
 
 
