@@ -10,6 +10,8 @@ int sensorval_2;
 int sensorval_3;
 //-------------------------------------
 
+bool doorTriggered = false;
+
 void InOutsetup() {
   pinMode(FSR0, INPUT);
   pinMode(FSR1, INPUT);
@@ -31,16 +33,25 @@ int inout(void) {
     //int door = 0;
     //if (sensorval_3 < 50) {         // 문 여닫힘 감지. 문이 열렸을 경우
     
-    if (sensorval_3 > 100) {         // 테스트용
+   // if (sensorval_3 > 100 && !doorTriggered) {         // 테스트용
         //delay(100);
 
         if (sensorval_0 > 100 || sensorval_1 > 100 || sensorval_2 > 100) {  // 문 손잡이 압력 감지
+            if (sensorval_3 > 100 && !doorTriggered){
             val = 1;                                            // 외출
+            doorTriggered = true;
+            }
         }
-        else if (sensorval_0 < 100 && sensorval_1 < 100 && sensorval_2 < 100) {
+        if (sensorval_0 < 100 && sensorval_1 < 100 && sensorval_2 < 100) {
+            if (sensorval_3 > 100 && !doorTriggered){
             val = 2;                                            // 귀가
+            doorTriggered = true;
+            }
         }
-    }
+        if (sensorval_3 < 100){
+            doorTriggered = false;
+        }
+    
     Serial.print("inout: ");
     Serial.println(val);  //test
     return val;
