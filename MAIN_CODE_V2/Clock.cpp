@@ -10,6 +10,8 @@ int menu =0;
 int setAll =0;
 int alarmState = 0; // 알람 상태를 저장할 전역 변수
 
+bool alarmTriggered = false;
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 RTC_DS1307 RTC;
 
@@ -33,7 +35,7 @@ void Clocksetup() {
 
     if (! RTC.isrunning()) {
         Serial.println("RTC is NOT running!");
-        RTC.adjust(DateTime(__DATE__, __TIME__)); // Set the date and time at compile time
+        //RTC.adjust(DateTime(__DATE__, __TIME__)); // Set the date and time at compile time
     }
         RTC.adjust(DateTime(__DATE__, __TIME__)); //removing "//" to adjust the time
         // The default display shows the date and time
@@ -286,28 +288,32 @@ int Alarm(void) {
     if (setAll == 1) {
 
         printAllOn();
-
         DateTime now = RTC.now();
-        if (now.hour() == alarmHours && now.minute() == alarmMinutes) {
+        
+        if (now.hour() == alarmHours && now.minute() == alarmMinutes && !alarmTriggered) {
             lcd.noBacklight();
             DateTime now = RTC.now();
-            tone(buzzer, 880); //play the note "A5" (LA5)
-            //delay(300);
-            //tone(buzzer, 698); //play the note "F6" (FA5)
-            lcd.backlight();
-            //limit = 1;
+            //tone(buzzer, 880); //play the note "A5" (LA5)
             
+            lcd.backlight();
             setAlarmState(1);
-            RTC.adjust(DateTime(0, 0, 0, now.hour(), now.minute(), now.second()));
+            Serial.println(alarmState);            
+
+            alarmTriggered = true;  // Alarm triggered, prevent further execution until the next alarm time 
+        }
+        if (now.second() == 0) {
+            alarmTriggered = false;
         }
         else {
             noTone(buzzer);
+            Serial.println("buzzer off");
+            setAlarmState(0);
         }
     }
     if (setAll == 2) {
         setAll = 0;
         setAlarmState(0);
     }
-    delayWithoutBlocking(200);
+    //delayWithoutBlocking(200);
     return;
 }
