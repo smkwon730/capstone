@@ -61,7 +61,7 @@ void loop() {
       }
       
       if (!rfidTriggered) {
-        uart = 1;
+        uart = 2;
       }
     }
   }
