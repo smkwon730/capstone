@@ -24,7 +24,7 @@ int rfidCheck(void) {
           if (content.substring(1) == "10 2C D6 20") { //change here the UID of the card/cards that you want to give access
               return 1;
           }
-          else if (content.substring(1) != "D1 2A D4 1C") {
+          else if (content.substring(1) != "10 2C D6 20") {
               return 2;
           }  
     }
