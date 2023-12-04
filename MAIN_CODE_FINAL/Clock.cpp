@@ -11,7 +11,7 @@ int menu =0;
 int setAll =0;
 int alarmState = 0; // 알람 상태를 저장할 전역 변수
 
-bool alarmTriggered = false;
+bool alarmTriggered = false;        // 알람 기능 불필요한 반복 방지 목적 flag
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 RTC_DS1307 RTC;
@@ -28,32 +28,34 @@ void Clocksetup() {
     pinMode(P2,INPUT_PULLUP);
     pinMode(P3,INPUT_PULLUP);
     pinMode(P4,INPUT_PULLUP);
-    pinMode(buzzer, OUTPUT); // Set buzzer as an output
     printAllOff();
-    Serial1.begin(9600);
-    Wire.begin();
+    Serial1.begin(9600);        // NodeMCU 와 통신 시작
+    Wire.begin();               // LCD와 I2C 통신 시작
     RTC.begin();
 
     if (! RTC.isrunning()) {
         //Serial.println("RTC is NOT running!");
-        RTC.adjust(DateTime(__DATE__, __TIME__)); // Set the date and time at compile time
+        RTC.adjust(DateTime(__DATE__, __TIME__)); // RTC 가 동작하고 있지 않을 시, RTC time을 컴파일 시간으로 설정
     }
         //RTC.adjust(DateTime(__DATE__, __TIME__)); 
 }
 
-void delayWithoutBlocking(unsigned long duration) {
+// delay() 없이 지연시간을 줄 수 있는 함수.
+// delay() 를 사용하면 프로그램이 중지되어 다른 작업을 수행할 수 없다는 단점이 있음
+// 센서의 변화 또한 감지할 수 없어 원하는 기능을 수행할 수 없으므로 이 함수를 사용
+void delayWithoutBlocking(unsigned long duration) {    
   unsigned long startTime = millis();
   while (millis() - startTime < duration) {
-    // 대기하고자 하는 시간까지 아무 작업도 수행하지 않음
+    // 대기
   }
 }
 
 void clockLoop() { 
-// check if you press the SET button and increase the menu index
-    if(digitalRead(P1)== LOW) {
-    menu=menu+1;
+
+    if(digitalRead(P1)== LOW) {    // 1번 버튼(SET button)을 눌러 menu index 증가
+        menu=menu+1;
     }
-    if((digitalRead(P2)== LOW)&&(digitalRead(P3)== LOW)) {
+    if((digitalRead(P2)== LOW)&&(digitalRead(P3)== LOW)) {    // 2, 3번 버튼을 동시에 눌러 알람시간을 설정
 
         DisplaySetHourAll();
         DisplaySetMinuteAll();
@@ -68,17 +70,17 @@ void clockLoop() {
         lcd.clear();
     }
 
-    if (menu==0) {
-        DisplayDateTime(); // void DisplayDateTime
-        Alarm(); // Alarm control
+    if (menu==0) {            // 초기화면 (현재 시간과 알람 정보를 보여줌)
+        DisplayDateTime();    // void DisplayDateTime
+        Alarm();              // Alarm control
     }
     if (menu==1){
-        DisplaySetHour();
+        DisplaySetHour();     // 현재 시간 설정
     }
     if (menu==2){
-        DisplaySetMinute();
+        DisplaySetMinute();   // 현재 분 설정
     }
-    if (menu==3){
+    if (menu==3){             // 설정 시간 저장 후 초기화면으로
         StoreAgg(); 
         delayWithoutBlocking(500);
         menu=0;
@@ -87,7 +89,7 @@ void clockLoop() {
 }
 
 void DisplayDateTime() {
-    // We show the current date and time
+    // show the current date and time
     DateTime now = RTC.now();
 
     lcd.setCursor(0, 0);
@@ -140,8 +142,7 @@ void DisplaySetHour() {
     delayWithoutBlocking(200);
 }
 
-void DisplaySetMinute()
-{
+void DisplaySetMinute() {
     // Setting the minutes
     lcd.clear();
     if (digitalRead(P2) == LOW) {
@@ -169,8 +170,7 @@ void DisplaySetMinute()
     delayWithoutBlocking(200);
 }
 
-void StoreAgg()
-{
+void StoreAgg() {
     // Variable saving
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -180,8 +180,7 @@ void StoreAgg()
     RTC.adjust(DateTime(0,0,0,hourupg,minupg,0));
     delayWithoutBlocking(200);
 }
-void DisplaySetHourAll()// Setting the alarm minutes
-{
+void DisplaySetHourAll() {   // Setting the alarm minutes
     while (digitalRead(P1) == HIGH) {
 
         lcd.clear();
@@ -213,8 +212,7 @@ void DisplaySetHourAll()// Setting the alarm minutes
     delayWithoutBlocking(200);
 }
 
-void DisplaySetMinuteAll()// Setting the alarm minutes
-{
+void DisplaySetMinuteAll() {     // Setting the alarm minutes
     while (digitalRead(P1) == HIGH) {
 
         lcd.clear();
@@ -258,7 +256,6 @@ void printAllOn() {
         lcd.print("0");
     }
     lcd.print(alarmMinutes, DEC);
-
 }
 
 void printAllOff() {
@@ -293,32 +290,31 @@ int Alarm(void) {
     if (setAll == 0) {
         printAllOff();
         noTone(buzzer);
-        setAlarmState(0); // 알람 상태 설정
+        setAlarmState(0); // 알람 상태 설정 (off)
     }
-    if (setAll == 1) {
+    if (setAll == 1) {    // 알람 기능 활성화 상태
 
         printAllOn();
         DateTime now = RTC.now();
-        
+
+        // 설정한 알람 시간과 현재시각 일치 시
         if (now.hour() == alarmHours && now.minute() == alarmMinutes && !alarmTriggered) {
             lcd.noBacklight();
             DateTime now = RTC.now();
             
             lcd.backlight();
-            setAlarmState(1);          
+            setAlarmState(1);       // 알람 상태를 1로 설정 
 
-            alarmTriggered = true;  // Alarm triggered, prevent further execution until the next alarm time 
+            alarmTriggered = true;  // 다음 알람시간까지의 중복동작을 방지하기 위한 flag 
         }
-        if (now.second() == 0) {
+        if (now.second() == 0) {    // 알람이 울리고 1분 후 알람 조건문 활성화
             alarmTriggered = false;
         }
         else {
-            noTone(buzzer);
-            //Serial.println("buzzer off");
-            setAlarmState(0);
+            setAlarmState(0);       // 알람에 의한 동작을 한 번만 실행한 후 alarm state를 다시 0으로 변경
         }
     }
-    if (setAll == 2) {
+    if (setAll == 2) {              // 4번 버튼을 눌러 알람기능 off
         setAll = 0;
         setAlarmState(0);
     }
