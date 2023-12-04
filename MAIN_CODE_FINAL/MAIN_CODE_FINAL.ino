@@ -1,4 +1,4 @@
-// MAIN_CODE_V5.ino
+// MAIN_CODE_FINAL.ino
 
 #include "InOut.h"
 #include "Clock.h"
@@ -27,29 +27,24 @@ void loop() {
   int inoutResult = inout();      // inout 함수의 결과를 저장하여 불필요한 호출 방지
 
   if (getAlarmState() == 1) {    
-
-    if (inoutResult == 1) {       // Didn't return home in time
-     
+    if (inoutResult == 1)        // Didn't return home in time
       uart = 1;
-    }
   }
   
-  if (inoutResult == 1 && inoutTriggered){
+  if (inoutResult == 1 && inoutTriggered)
     inoutTriggered = false;
-  }
 
   if (getAlarmState() == 0 && !inoutTriggered) {
     if (inoutResult == 2) {         // got home
 
       inoutTriggered = true;
       
-      
       // 제한시간 이내 rfid 태그 코드
       unsigned long start_time = millis();      
       while(millis() - start_time < delay_time) {
         
         int rfidResult = rfidCheck();
-        Serial.println(millis());
+        //Serial.println(millis());
         
         if (rfidResult == 1) {     // Authorized access
           uart = 3;
@@ -63,9 +58,8 @@ void loop() {
         }
       }
       
-      if (!rfidTriggered) {
+      if (!rfidTriggered)
         uart = 2;
-      }
     }
   }
   rfidTriggered = false;
