@@ -65,7 +65,7 @@ void loop() {
   }
   rfidTriggered = false;           // 태그 여부 초기화
 
-  // uart가 0이 아니면서 이전의 uart와 다르고, 0이 아니라면
+  // uart가 0이 아니면서 이전의 uart와 다르다면
   // uart를 출력하고 previousUart를 업데이트한다.
   if (uart != previousUart && uart != 0) {
     Serial.println(uart);
