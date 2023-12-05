@@ -5,7 +5,7 @@
 #include "Clock.h"
 #include "RFID.h"
 
-const long delay_time = 1000*10;     // RFID 태그 제한시간 10 sec (for test)
+//const long delay_time = 1000*10;     // RFID 태그 제한시간 10 sec (for test)
 const long delay_time = 1000*60*5;   // RFID 태그 제한시간 5 min
 
 //========== flag ==========//
