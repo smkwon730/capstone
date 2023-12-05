@@ -272,20 +272,16 @@ void setAlarmState(int state) {     // 알람 상태를 변경할 때 사용
 
 int Alarm(void) {
 
-    if (Serial1.available()){
-      String blynk = Serial1.readString();
-      blynk.trim();
-      if (blynk == "on"){
-        setAll = 1;
-      }
-      if (blynk == "off"){
-        setAll = 0;
-      }
-      //Serial.println(blynk);
-    }
-    if (digitalRead(P4) == LOW) {
+    if (Serial1.available()){                 // NodeMCU와 UART 통신 (와이파이기능 MCU개발보드)
+      String blynk = Serial1.readString();    // 수신값 저장
+      blynk.trim();                           // 문자열 공백 제거
+      if (blynk == "on")                      // on 수신 시
+        setAll = 1;                           // alarm on
+      if (blynk == "off")                     // off 수신 시
+        setAll = 0;                           // alarm off
+    }    
+    if (digitalRead(P4) == LOW)
         setAll = setAll + 1;
-    }
     
     if (setAll == 0) {
         printAllOff();
