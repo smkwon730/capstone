@@ -281,7 +281,7 @@ int Alarm(void) {
       if (blynk == "off"){
         setAll = 0;
       }
-      Serial.println(blynk);
+      //Serial.println(blynk);
     }
     if (digitalRead(P4) == LOW) {
         setAll = setAll + 1;
